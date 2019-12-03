@@ -6,9 +6,10 @@ Prototype for various OAuth related technologies, such as mTLS, PAR, and RAR. Do
 Raw implementations of:
 
 * OAuth 2.0 with authorization code grant and client credentials grant
-* mTLS 
+* mTLS for client authentication and token binding
 * RAR
 * PAR
+* OAuth Server Metadata
 
 ## Setup
 
@@ -73,7 +74,7 @@ pip3 install -r app/requirements.txt
 
 The development server will be available at http://127.0.0.1:8000/, although with this path, it will only produce an error message. The admin interface at http://127.0.0.1:8000/admin/ (note the trailing slash).
 
-After creating servers in the web interface, the servers' endpoints will be available at URLs starting with http://127.0.0.1:8000/servername/, where `servername` is the name of the respective server. To see all URLs for `servername`, go to http://localhost:8000/.well-known/openid-configuration/servername.
+After creating servers in the web interface, the servers' endpoints will be available at URLs starting with http://127.0.0.1:8000/servername/, where `servername` is the name of the respective server. To see all URLs for `servername` and further configuration information (see RFC8414), go to http://localhost:8000/.well-known/oauth-authorization-server/servername.
 
 ### Use nginx as TLS Reverse Proxy
 Use the tool `mkcert` (https://github.com/FiloSottile/mkcert) to create certificates in the `nginx` subfolder:
@@ -87,7 +88,7 @@ chmod +x mkcert
 sudo nginx -c `pwd`/nginx.conf
 ```
 
-The app server must be running via the `runserver` command. The server should now be available with TLS at https://localhost
+The app server must be running via the `runserver` command. The server should now be available with TLS at https://localhost. Except for protocol and hostname, the URLs stay the same, e.g., https://localhost/.well-known/openid-configuration/servername.
 
 ### Run Tests (Requires nginx)
 Note: The test files contain a statically configured client id and
