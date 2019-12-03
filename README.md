@@ -1,5 +1,5 @@
 # proto6749
-Prototype for various OAuth related technologies, such as mTLS, PAR, and RAR.
+Prototype for various OAuth related technologies, such as mTLS, PAR, and RAR. Do not use this in production environments!
 
 ## Current Featureset
 
@@ -83,7 +83,7 @@ chmod +x mkcert
 sudo nginx -c `pwd`/nginx.conf
 ```
 
-The server should now be available at https://localhost
+The app server must be running via the `runserver` command. The server should now be available with TLS at https://localhost
 
 ### Run Tests (Requires nginx)
 Note: The test files contain a statically configured client id and
