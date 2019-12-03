@@ -1,0 +1,32 @@
+{% load static %}
+<html>
+  <head>
+    <title>OAuth: Authorize</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="page-header">
+      <h1>Authorize?</h1>
+    </div>
+    <div class="content container">
+      <div class="row">
+        <div class="col-md-8">
+
+          <form method="post">
+            {% csrf_token %}
+            <b>Bitte prüfen:</b>
+            {% for h in consent.html %}
+            <div style="border: 5px solid grey; padding: 5px; border-radius: 5px;">
+              {{ h|safe }}
+            </div>
+            {% endfor %}
+            <button type="submit">Submit</button>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

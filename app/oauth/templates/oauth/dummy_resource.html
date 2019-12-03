@@ -1,0 +1,29 @@
+{% load static %}
+<html>
+  <head>
+    <title>OAuth: Authorize</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="page-header">
+      Dummy Resource
+      <h1>You are authorized</h1>
+    </div>
+    <div class="content container">
+      <div class="row">
+        <div class="col-md-8">
+          {% for session in sessions %}
+          <p>Session:</p>
+          <table>
+            {% for field, value in session.fields.items %}
+            <tr><th>{{ field }}</th><td>{{ value }}</td></tr>
+            {% endfor %}
+          </table>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
