@@ -88,7 +88,7 @@ chmod +x mkcert
 sudo nginx -c `pwd`/nginx.conf
 ```
 
-The app server must be running via the `runserver` command. The server should now be available with TLS at https://localhost. Except for protocol and hostname, the URLs stay the same, e.g., https://localhost/.well-known/openid-configuration/servername.
+The app server must be running via the `runserver` command. The server should now be available with TLS at https://localhost. Except for protocol and hostname/port, the URLs stay the same, e.g., https://localhost/.well-known/openid-configuration/servername.
 
 ### Run Tests (Requires nginx)
 Note: The test files contain a statically configured client id and
