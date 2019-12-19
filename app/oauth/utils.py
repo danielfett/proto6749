@@ -5,7 +5,6 @@ def same_certificate(compare, received):
     # the same for the stored certificate to remove differences
     # with newlines.
     def clean(cert):
-        return '\n'.join(line.strip() for line in cert.split('\n'))
+        return "\n".join(line.strip() for line in cert.split("\n"))
 
     return clean(received) == clean(compare)
-

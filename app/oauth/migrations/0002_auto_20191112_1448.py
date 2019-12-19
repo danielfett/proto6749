@@ -7,23 +7,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth', '0001_squashed_0008_auto_20191112_1440'),
+        ("oauth", "0001_squashed_0008_auto_20191112_1440"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='client',
-            name='name',
-            field=models.CharField(max_length=128),
+            model_name="client", name="name", field=models.CharField(max_length=128),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='redirect_uris',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.URLField(), size=None),
+            model_name="client",
+            name="redirect_uris",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.URLField(), size=None
+            ),
         ),
         migrations.AlterField(
-            model_name='session',
-            name='code_challenge_method',
-            field=models.TextField(blank=True, choices=[('S256', 'S256'), ('plain', 'plain')], max_length=5),
+            model_name="session",
+            name="code_challenge_method",
+            field=models.TextField(
+                blank=True, choices=[("S256", "S256"), ("plain", "plain")], max_length=5
+            ),
         ),
     ]

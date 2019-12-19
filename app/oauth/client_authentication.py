@@ -4,31 +4,32 @@ from urllib.parse import unquote_plus
 from django.conf import settings
 from .utils import same_certificate
 
+
 class ClientAuthMethod:
     def __init__(self, client):
         self.client_unverified = client
-    
+
     @staticmethod
     def get_authenticator(request):
         from .models import Client
-        
-        if 'Authorization' in request.headers:
+
+        if "Authorization" in request.headers:
             client_id = ClientSecretBasic.get_client_id(request)
             client = Client.objects.get(id=client_id)
             return ClientSecretBasic(client)
         else:
-            client_id = request.POST['client_id']
+            client_id = request.POST["client_id"]
             client = Client.objects.get(id=client_id)
             for cls in [
-                    ClientSecretPost,
-                    TLSClientAuth,
-                    SelfSignedTLSClientAuth,
-                    ]:
+                ClientSecretPost,
+                TLSClientAuth,
+                SelfSignedTLSClientAuth,
+            ]:
                 if cls.ID == client.token_endpoint_auth_method:
                     return cls(client)
-            
+
         raise Exception("Client authentication method not found.")
-        
+
 
 class ClientAuthSecret(ClientAuthMethod):
     """
@@ -36,15 +37,17 @@ class ClientAuthSecret(ClientAuthMethod):
 
     TODO: client secrets should be stored hashed/salted
     """
-    
+
     def check_secret(self, client_id, client_secret):
         if self.client_unverified.secret != client_secret:
             return None
         if self.client_unverified.token_endpoint_auth_method != self.ID:
-            raise Exception("Client is not allowed to use this client authentication method.")
+            raise Exception(
+                "Client is not allowed to use this client authentication method."
+            )
         return self.client_unverified  # is now verified
 
-    
+
 class ClientSecretBasic(ClientAuthSecret):
     """
     Defined in RFC6749:
@@ -59,26 +62,29 @@ class ClientSecretBasic(ClientAuthSecret):
     authentication scheme for authenticating clients that were issued a
     client password.
     """
-    
-    ID = 'client_secret_basic'  # https://tools.ietf.org/html/rfc7591#section-2
-    NAME = 'Client secret contained in Basic Authorization header'
+
+    ID = "client_secret_basic"  # https://tools.ietf.org/html/rfc7591#section-2
+    NAME = "Client secret contained in Basic Authorization header"
 
     @staticmethod
     def get_client_id_and_secret(request):
-        header_value = request.headers['Authorization'].split(' ')[1]
-        decoded = str(b64decode(header_value), 'ascii')
-        client_id_enc, client_secret_enc = decoded.split(':')
-        client_id, client_secret = unquote_plus(client_id_enc), unquote_plus(client_secret_enc)
+        header_value = request.headers["Authorization"].split(" ")[1]
+        decoded = str(b64decode(header_value), "ascii")
+        client_id_enc, client_secret_enc = decoded.split(":")
+        client_id, client_secret = (
+            unquote_plus(client_id_enc),
+            unquote_plus(client_secret_enc),
+        )
         return client_id, client_secret
 
     @staticmethod
     def get_client_id(request):
         return ClientSecretBasic.get_client_id_and_secret(request)[0]
-    
+
     def check(self, request):
         return self.check_secret(*ClientSecretBasic.get_client_id_and_secret(request))
 
-    
+
 class ClientSecretPost(ClientAuthSecret):
     """
     Defined in RFC6749:
@@ -96,11 +102,12 @@ class ClientSecretPost(ClientAuthSecret):
           parameter if the client secret is an empty string.
     """
 
-    ID = 'client_secret_post'  # https://tools.ietf.org/html/rfc7591#section-2
-    NAME = 'Client secret contained in form post parameters.'
+    ID = "client_secret_post"  # https://tools.ietf.org/html/rfc7591#section-2
+    NAME = "Client secret contained in form post parameters."
+
     def check(self, request):
-        client_id = request.POST['client_id']
-        client_secret = request.POST['client_secret']
+        client_id = request.POST["client_id"]
+        client_secret = request.POST["client_secret"]
         return self.check_secret(client_id, client_secret)
 
 
@@ -128,9 +135,9 @@ class SelfSignedTLSClientAuth(ClientAuthMethod):
     parameter, described in OAuth 2.0, Section 2.2 [RFC6749].
     """
 
-    ID = 'self_signed_tls_client_auth'  # https://tools.ietf.org/html/draft-ietf-oauth-mtls-17#section-2.2.1
-    NAME = 'Mutual TLS with a self-signed certificate'
-    
+    ID = "self_signed_tls_client_auth"  # https://tools.ietf.org/html/draft-ietf-oauth-mtls-17#section-2.2.1
+    NAME = "Mutual TLS with a self-signed certificate"
+
     def check(self, request):
         try:
             tls_cert = request.headers[settings.TLS_CLIENT_CERTIFICATE_HEADER]
@@ -138,16 +145,16 @@ class SelfSignedTLSClientAuth(ClientAuthMethod):
             raise Exception("TLS Certificate not sent by client")
 
         try:
-            client_id = request.POST['client_id']
+            client_id = request.POST["client_id"]
         except KeyError:
             raise Exception("client_id not sent by client in POST data")
-            
+
         if not same_certificate(self.client_unverified.tls_certificate, tls_cert):
-            print ("Client certificates do not match.")
+            print("Client certificates do not match.")
             return None
         if not client_id == self.client_unverified.id:
             return None
-        
+
         return self.client_unverified  # is now verified
 
 
@@ -169,21 +176,27 @@ class TLSClientAuth(ClientAuthMethod):
     registered for that particular client.
     """
 
-    ID = 'tls_client_auth'  # https://tools.ietf.org/html/draft-ietf-oauth-mtls-17#section-2.1.1
-    NAME = 'Mutual TLS with PKI certificates (NOT IMPLEMENTED)'
+    ID = "tls_client_auth"  # https://tools.ietf.org/html/draft-ietf-oauth-mtls-17#section-2.1.1
+    NAME = "Mutual TLS with PKI certificates (NOT IMPLEMENTED)"
 
     attributes = [
-        ('tls_client_auth_subject_dn', "subject distinguished name of the certificate"),
-        ('tls_client_auth_san_dns', "dNSName SAN entry in the certificate"),
-        ('tls_client_auth_san_uri', "uniformResourceIdentifier SAN entry in the certificate"),
-        ('tls_client_auth_san_ip', "IP address in IPAddress SAN entry in the certificate"),
-        ('tls_client_auth_san_email', "rfc822Name SAN entry in the certificate"),
+        ("tls_client_auth_subject_dn", "subject distinguished name of the certificate"),
+        ("tls_client_auth_san_dns", "dNSName SAN entry in the certificate"),
+        (
+            "tls_client_auth_san_uri",
+            "uniformResourceIdentifier SAN entry in the certificate",
+        ),
+        (
+            "tls_client_auth_san_ip",
+            "IP address in IPAddress SAN entry in the certificate",
+        ),
+        ("tls_client_auth_san_email", "rfc822Name SAN entry in the certificate"),
     ]
 
     def check(self, request):
         # TODO: Implement
         raise Exception("Not implemented")
-        
+
 
 class ClientAuthRequiredMixin:
     def check_client_authentication(self, request):
@@ -196,19 +209,23 @@ class ClientAuthRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
         client = self.check_client_authentication(request)
         if client is None:
-            return HttpResponse('Unauthorized', status=401)
+            return HttpResponse("Unauthorized", status=401)
         if client.server != self.server:
-            print(f"Client is registered for {client.server}, not for this server ({self.server}).")
-            return HttpResponse('Unauthorized', status=401)
+            print(
+                f"Client is registered for {client.server}, not for this server ({self.server})."
+            )
+            return HttpResponse("Unauthorized", status=401)
 
         self.client_verified = client
         return super().dispatch(request, *args, **kwargs)
 
+
 client_auth_methods_supported = [
-    (cls.ID, cls.NAME) for cls in [
+    (cls.ID, cls.NAME)
+    for cls in [
         ClientSecretBasic,
         ClientSecretPost,
         TLSClientAuth,
         SelfSignedTLSClientAuth,
-        ]
+    ]
 ]

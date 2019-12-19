@@ -8,23 +8,31 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth', '0002_auto_20191112_1448'),
+        ("oauth", "0002_auto_20191112_1448"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='locations',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.URLField(), blank=True, null=True, size=None),
+            model_name="client",
+            name="locations",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.URLField(), blank=True, null=True, size=None
+            ),
         ),
         migrations.AddField(
-            model_name='session',
-            name='client_location',
+            model_name="session",
+            name="client_location",
             field=models.URLField(blank=True, default=None, null=True),
         ),
         migrations.AlterField(
-            model_name='session',
-            name='client',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='oauth.Client'),
+            model_name="session",
+            name="client",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="oauth.Client",
+            ),
         ),
     ]

@@ -18,13 +18,39 @@ from django.urls import path, include
 from .views import *
 
 urlpatterns = [
-    path('<slug:server>', MetadataEndpoint.as_view(), name='issuer'),
-    path('.well-known/oauth-authorization-server/<slug:server>', MetadataEndpoint.as_view(), name='metadata_endpoint'),
-    path('.well-known/openid-configuration/<slug:server>', MetadataEndpoint.as_view(), name='metadata_endpoint'),
-    path('<slug:server>/push', PushedRequestEndpoint.as_view(), name='pushed_authorization_request_endpoint'),
-    path('<slug:server>/authorize', AuthorizationEndpoint.as_view(), name='authorization_endpoint'),
-    path('<slug:server>/token', TokenEndpoint.as_view(), name='token_endpoint'),
-    path('<slug:server>/introspect', IntrospectionEndpoint.as_view(), name='introspection_endpoint'),
-    path('<slug:server>/userinfo', UserInfoEndpoint.as_view(), name='userinfo_endpoint'),
-    path('<slug:server>/resource', DummyResourceEndpoint.as_view(), name='resource_endpoint'),        
+    path("<slug:server>", MetadataEndpoint.as_view(), name="issuer"),
+    path(
+        ".well-known/oauth-authorization-server/<slug:server>",
+        MetadataEndpoint.as_view(),
+        name="metadata_endpoint",
+    ),
+    path(
+        ".well-known/openid-configuration/<slug:server>",
+        MetadataEndpoint.as_view(),
+        name="metadata_endpoint",
+    ),
+    path(
+        "<slug:server>/push",
+        PushedRequestEndpoint.as_view(),
+        name="pushed_authorization_request_endpoint",
+    ),
+    path(
+        "<slug:server>/authorize",
+        AuthorizationEndpoint.as_view(),
+        name="authorization_endpoint",
+    ),
+    path("<slug:server>/token", TokenEndpoint.as_view(), name="token_endpoint"),
+    path(
+        "<slug:server>/introspect",
+        IntrospectionEndpoint.as_view(),
+        name="introspection_endpoint",
+    ),
+    path(
+        "<slug:server>/userinfo", UserInfoEndpoint.as_view(), name="userinfo_endpoint"
+    ),
+    path(
+        "<slug:server>/resource",
+        DummyResourceEndpoint.as_view(),
+        name="resource_endpoint",
+    ),
 ]
