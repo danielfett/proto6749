@@ -123,19 +123,8 @@ class AuthorizationEndpoint(AuthzServerView):
         session = Session.objects.get(id=session_id, server=self.server)
         # TODO: Check if/which button was clicked
         session.user = request.user
-        session.generate_code()
         session.save()
-        parameters = {
-            "code": session.authorization_code,
-            "state": session.state,
-        }
-        if session.redirect_uri is None:
-            redirect_uri = session.client.redirect_uris[0]
-        else:
-            redirect_uri = session.redirect_uri
-        final_redirect = redirect_uri + "?" + urlencode(parameters)
-        # TODO: correct assembling of redirect_uri (when parameters exist)
-        return redirect(final_redirect)
+        return redirect(session.get_authorization_response_uri())
 
 
 class TokenEndpoint(ClientAuthRequiredMixin, AuthzServerView):

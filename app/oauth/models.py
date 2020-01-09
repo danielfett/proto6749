@@ -10,6 +10,7 @@ from base64 import urlsafe_b64encode
 from hashlib import sha256
 from json import loads
 from .client_authentication import TLSClientAuth, client_auth_methods_supported
+from .helpers import add_url_parameters
 
 import uuid
 
@@ -144,6 +145,38 @@ class Session(models.Model):
     def expired(self):
         return self.expires_in < 0
 
+    def get_authorization_response_uri(self):
+        if self.redirect_uri is None:
+            redirect_uri = self.client.redirect_uris[0]
+        else:
+            redirect_uri = self.redirect_uri
+
+        if self.response_type == "code":
+            self.generate_code()
+            parameters = {
+                "code": self.authorization_code,
+                "state": self.state,
+            }
+
+        elif self.response_type == "token":
+            self.generate_access_token()
+            parameters = {
+                "access_token": self.access_token,
+                "state": self.state,
+                "token_type": "Bearer",
+                "expires_in": 9999999,
+            }
+
+        else:
+            raise Exception("Illegal response type.")
+
+        self.save()
+        return add_url_parameters(
+            redirect_uri,
+            parameters,
+            "query" if self.response_type == "code" else "fragment",
+        )
+
     REQUEST_PARAMETERS = (
         "response_type",
         "state",
@@ -155,16 +188,16 @@ class Session(models.Model):
 
     @classmethod
     def create_from_request(cls, server, authenticated_client=None, kwargs={}):
-        if "response_type" not in kwargs:
-            raise Exception("Missing parameter: response_type")
-        if kwargs["response_type"] != "code":
-            raise Exception(f"Illegal response type: {kwargs['response_type']}")
-
         if "client_id" not in kwargs:
             raise Exception("Missing parameter: client_id")
         client_from_clientid = Client.objects.get(id=kwargs["client_id"])
         if authenticated_client is not None and client_from_clientid != client:
             raise Exception("Illegal client_id for authenticated client")
+
+        if "response_type" not in kwargs:
+            raise Exception("Missing parameter: response_type")
+        if kwargs["response_type"] not in ("code", "token"):
+            raise Exception(f"Illegal response type: {kwargs['response_type']}")
 
         if "state" not in kwargs and "code_challenge" not in kwargs:
             raise Exception("Missing CSRF protection (state or PKCE)")
